@@ -4,6 +4,10 @@
 #include "ceres/ceres.h"
 #include <math.h>
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 
 struct GaussianCostFunction
 {
@@ -16,8 +20,9 @@ struct GaussianCostFunction
 	bool operator()(const T* const mu, const T* const sigma, T* residual) const
 	{
 		// TODO: Implement the cost function
-		residual[0] = T(0.0);
-
+		auto constant = T(1.0 / sqrt(2.0 * M_PI * pow(*sigma, 2.0)));
+		auto exponent = T( exp(-pow(point.x - *mu, 2.0) / (2.0 * pow(*sigma, 2))) );
+		residual[0] = point.y - constant * exponent;
 		return true;
 	}
 
@@ -31,7 +36,7 @@ int main(int argc, char** argv)
 	google::InitGoogleLogging(argv[0]);
 
 	// Read data points
-	const std::string file_path = "../data/points_gaussian.txt";
+	const std::string file_path = "../../data/points_gaussian.txt";
 	const auto points = read_points_from_file<Point2D>(file_path);
 
 	// Good initial values make the optimization easier
